@@ -1,6 +1,5 @@
 package club.gclmit.gitfox.views;
 
-import club.gclmit.gitfox.model.Item;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.table.JBTable;
@@ -10,10 +9,8 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * TODO
@@ -29,7 +26,6 @@ public class ItemTable extends JBTable {
     private static final int VALUE_COLUMN = 1;
     private final GitfoxServerTableModel foxServerTableModel = new GitfoxServerTableModel();
 
-    protected static List<Item> items = new ArrayList<>();
 
     /**
      * instantiation AliasTable
@@ -72,7 +68,6 @@ public class ItemTable extends JBTable {
         final ItemEditorPanel macroEditor = new ItemEditorPanel("Add Commit Server", "", "");
         if (macroEditor.showAndGet()) {
             final String name = macroEditor.getKey();
-            items.add(new Item(macroEditor.getKey(), macroEditor.getValue()));
             final int index = indexOfGitfoxServerWithName(name);
             log.assertTrue(index >= 0);
             foxServerTableModel.fireTableDataChanged();
@@ -81,24 +76,20 @@ public class ItemTable extends JBTable {
     }
 
     private boolean isValidRow(int selectedRow) {
-        return selectedRow >= 0 && selectedRow < items.size();
+        return true;
     }
 
     public void moveUp() {
         int selectedRow = getSelectedRow();
         int index1 = selectedRow - 1;
-        if (selectedRow != -1) {
-            Collections.swap(items, selectedRow, index1);
-        }
+
         setRowSelectionInterval(index1, index1);
     }
 
     public void moveDown() {
         int selectedRow = getSelectedRow();
         int index1 = selectedRow + 1;
-        if (selectedRow != -1) {
-            Collections.swap(items, selectedRow, index1);
-        }
+
         setRowSelectionInterval(index1, index1);
     }
 
@@ -111,9 +102,6 @@ public class ItemTable extends JBTable {
         final int originalRow = selectedRows[0];
         for (int i = selectedRows.length - 1; i >= 0; i--) {
             final int selectedRow = selectedRows[i];
-            if (isValidRow(selectedRow)) {
-                items.remove(selectedRow);
-            }
         }
         foxServerTableModel.fireTableDataChanged();
         if (originalRow < getRowCount()) {
@@ -124,22 +112,13 @@ public class ItemTable extends JBTable {
         }
     }
 
-    public List<Item> getItems() {
-        return items;
-    }
 
-    public void reset(List<Item> data) {
-        items = data;
+
+    public void reset() {
         foxServerTableModel.fireTableDataChanged();
     }
 
     private int indexOfGitfoxServerWithName(String name) {
-        for (int i = 0; i < items.size(); i++) {
-            final Item server = items.get(i);
-            if (name.equals(server.getKey())) {
-                return i;
-            }
-        }
         return -1;
     }
 
@@ -147,14 +126,7 @@ public class ItemTable extends JBTable {
         if (getSelectedRowCount() != 1) {
             return false;
         }
-        final int selectedRow = getSelectedRow();
-        final Item server = items.get(selectedRow);
-        final ItemEditorPanel editor = new ItemEditorPanel("Update Commit Server", server.getKey(), server.getValue());
-        if (editor.showAndGet()) {
-            server.setKey(editor.getKey());
-            server.setValue(editor.getValue());
-            foxServerTableModel.fireTableDataChanged();
-        }
+        foxServerTableModel.fireTableDataChanged();
         return true;
     }
 
@@ -181,7 +153,7 @@ public class ItemTable extends JBTable {
 
         @Override
         public int getRowCount() {
-            return items.size();
+            return 0;
         }
 
         @Override
@@ -191,16 +163,8 @@ public class ItemTable extends JBTable {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            final Item pair = items.get(rowIndex);
-            switch (columnIndex) {
-                case NAME_COLUMN:
-                    return pair.getKey();
-                case VALUE_COLUMN:
-                    return pair.getValue();
-                default:
-                    log.error("Wrong indices");
-                    return null;
-            }
+
+            return null;
         }
 
         @Override
